@@ -7,11 +7,12 @@ TagManager:
   - Board
   - Corners
   - Walls
+  - Bullets
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Bullets
   - Water
   - UI
   - 

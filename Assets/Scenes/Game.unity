@@ -239,7 +239,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1213874430
 GameObject:
@@ -270,7 +270,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1430836524
 GameObject:
@@ -304,11 +304,346 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dotPrefab: {fileID: 2860461401351668816, guid: a0d435fbe3e2bea43aa66b75afca1821, type: 3}
   wallPrefab: {fileID: 1853213952635902157, guid: 8532e0c656dfa944b8e4f6292b8a62ff, type: 3}
-  tankPrefab: {fileID: 0}
+  tankPrefab: {fileID: 3224906026280767922, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
+  bulletPrefab: {fileID: 8944481924664981165, guid: 654c3eb477330bb7d9a4066c41c52edb, type: 3}
   sideLength: 9
-  players: 2
-  moveSpeed: 3
-  rotationSpeed: 7
+  players: 3
+  tankColors:
+  - {r: 0, g: 0, b: 1, a: 1}
+  - {r: 1, g: 0, b: 0, a: 1}
+  - {r: 0, g: 1, b: 0, a: 1}
+  - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  - {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  moveSpeed: 75
+  rotationSpeed: 5.5
+  bulletSpeed: 2.5
+  invulnerableTimer: 2
+  despawnTimerTicks: 500
+  reloadTimerTicks: 250
+  defaultMagazineSize: 10
+  tanksMoveAction:
+  - m_Name: Input Action
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 94e51167-0d1c-4f75-9d7f-7a33aa38b101
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 1D Axis
+      m_Id: 784af382-1c23-408f-84a8-b0aa2270e843
+      m_Path: 1DAxis
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 4
+    - m_Name: negative
+      m_Id: 0789cf21-bf08-45a4-b31f-4eb809cc8cad
+      m_Path: <Keyboard>/d
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 8
+    - m_Name: positive
+      m_Id: c03d68eb-6d62-47cc-aa66-1c53ddb4b886
+      m_Path: <Keyboard>/e
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 8
+    m_Flags: 0
+  - m_Name: Input Action
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 8c1302bb-2f30-457b-980f-3e1595aee56d
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 1D Axis
+      m_Id: 844bec5d-87b0-4689-ad74-e40771269701
+      m_Path: 1DAxis
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 4
+    - m_Name: negative
+      m_Id: a75b786b-867d-42f3-af9d-41a4142ddc09
+      m_Path: <Keyboard>/k
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 8
+    - m_Name: positive
+      m_Id: e171d0c3-e9b5-4dbb-8cd6-8c0789d5ebb0
+      m_Path: <Keyboard>/i
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 8
+    m_Flags: 0
+  - m_Name: Input Action
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: f1088c00-7f7b-4ed2-90dc-f9aece636e32
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 1D Axis
+      m_Id: 426c8fc1-9a37-4e40-8bfe-fcd9da6b3ebc
+      m_Path: 1DAxis
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 4
+    - m_Name: negative
+      m_Id: e57890ef-72f9-4c66-a7bf-5792c0cb883a
+      m_Path: <Keyboard>/downArrow
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 8
+    - m_Name: positive
+      m_Id: c1e8cf11-6400-4dff-952c-975ddb0905bb
+      m_Path: <Keyboard>/upArrow
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 8
+    m_Flags: 0
+  - m_Name: Input Action
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: a7550e08-bbc2-4d35-bb7b-dec0fe634ca5
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 1D Axis
+      m_Id: 1ac3a654-2fda-4361-81c2-8556484e279b
+      m_Path: 1DAxis
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 4
+    - m_Name: negative
+      m_Id: dd70f662-f204-4f55-a15f-dfd32535deab
+      m_Path: <Keyboard>/numpad2
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 8
+    - m_Name: positive
+      m_Id: 915662fd-591e-4575-9a6f-e1e96a56d3f6
+      m_Path: <Keyboard>/numpad8
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 8
+    m_Flags: 0
+  tanksRotateAction:
+  - m_Name: Element 0
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 101829a0-d841-49c0-a217-3c2bff5530d6
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 1D Axis
+      m_Id: 64314b61-8aab-4a57-8d45-da6f3a25befe
+      m_Path: 1DAxis
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Element 0
+      m_Flags: 4
+    - m_Name: negative
+      m_Id: df5d2764-7f9e-4105-86fc-8a4947c81a69
+      m_Path: <Keyboard>/s
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Element 0
+      m_Flags: 8
+    - m_Name: positive
+      m_Id: b3a3c2e7-de2d-40d2-9d96-34ae9d58ea29
+      m_Path: <Keyboard>/f
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Element 0
+      m_Flags: 8
+    m_Flags: 0
+  - m_Name: Input Action
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 69983797-8b8d-46c4-bdf1-5a1484b6f2f2
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 1D Axis
+      m_Id: 344e411b-3309-4117-82d2-75f33b847627
+      m_Path: 1DAxis
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 4
+    - m_Name: negative
+      m_Id: b542bb09-8cb1-488f-a8f7-5688528e3352
+      m_Path: <Keyboard>/j
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 8
+    - m_Name: positive
+      m_Id: ba4e3d3e-095c-4103-a84d-e558bcb5baf0
+      m_Path: <Keyboard>/l
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 8
+    m_Flags: 0
+  - m_Name: Input Action
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 475327b8-7569-4f8e-9ea1-526f084cafe6
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 1D Axis
+      m_Id: f11560a2-6c9c-4810-b2bd-9bc607e09c50
+      m_Path: 1DAxis
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 4
+    - m_Name: negative
+      m_Id: c6c7d65e-9095-43d4-bb91-5ff0c71c8e40
+      m_Path: <Keyboard>/leftArrow
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 8
+    - m_Name: positive
+      m_Id: 4009847e-c231-4e63-8007-fa9184ce4001
+      m_Path: <Keyboard>/rightArrow
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 8
+    m_Flags: 0
+  - m_Name: Input Action
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: bd225983-e8c6-4dd4-ac4d-a1e03314290a
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 1D Axis
+      m_Id: 8e6903b5-0c6b-4ec8-96f6-0547cba63ae8
+      m_Path: 1DAxis
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 4
+    - m_Name: negative
+      m_Id: 14571b3b-df70-497e-a860-d7d57be40c87
+      m_Path: <Keyboard>/numpad4
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 8
+    - m_Name: positive
+      m_Id: 5110c569-e475-4818-ab22-82544a9e029d
+      m_Path: <Keyboard>/numpad6
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 8
+    m_Flags: 0
+  tanksShootAction:
+  - m_Name: Element 0
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 96417fb8-eca4-4b60-8bfa-4dc406fd3acb
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: d57f90bb-8dad-4028-a236-9bbf14597db9
+      m_Path: <Keyboard>/q
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Element 0
+      m_Flags: 0
+    m_Flags: 0
+  - m_Name: Input Action
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: dd4e6d38-1fc7-49c4-a29f-8b6e448e62c5
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: 141a9980-5224-4e79-84e7-fd9c5cbc4ab5
+      m_Path: <Keyboard>/y
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 0
+    m_Flags: 0
+  - m_Name: Input Action
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 41452e7a-f319-46d9-ba34-43b105ce6511
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: cde4d2f8-8ec0-4828-81a9-a96ed15661c5
+      m_Path: <Keyboard>/ctrl
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 0
+    m_Flags: 0
+  - m_Name: Input Action
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 6f38e13c-5bea-42bc-bfaf-934462eb00a7
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: e1b8604b-7217-40a0-9768-114e59c82179
+      m_Path: <Keyboard>/numpad0
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Input Action
+      m_Flags: 0
+    m_Flags: 0
 --- !u!4 &1430836526
 Transform:
   m_ObjectHideFlags: 0
@@ -370,6 +705,69 @@ MonoBehaviour:
   m_DefaultActionMap: UI
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!1 &1720061370
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1720061372}
+  - component: {fileID: 1720061371}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1720061371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1720061370}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1edf45899ed7f3a97b120961f53b9688, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sounds:
+  - name: Explode
+    clip: {fileID: 8300000, guid: 8e5ffbc563314d55786eb2c3a4348397, type: 3}
+    volume: 1
+    pitch: 1
+    loop: 0
+    source: {fileID: 0}
+  - name: Pass
+    clip: {fileID: 8300000, guid: 039eb8ad4fc133f2b88df4c4b90e6d7f, type: 3}
+    volume: 1
+    pitch: 1
+    loop: 0
+    source: {fileID: 0}
+  - name: Shoot
+    clip: {fileID: 8300000, guid: 8355192722332f5c7962d47fd12dfd7b, type: 3}
+    volume: 1
+    pitch: 1
+    loop: 0
+    source: {fileID: 0}
+--- !u!4 &1720061372
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1720061370}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.5935112, y: 1.2914084, z: 0.020403663}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1942980998
 GameObject:
   m_ObjectHideFlags: 0
@@ -447,7 +845,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1942980998}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -0.0029, y: -0.0018, z: 0}
   m_LocalScale: {x: 9, y: 9, z: 9}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -456,7 +854,7 @@ Transform:
   - {fileID: 4147873377265814432}
   - {fileID: 4147873376499500856}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!61 &1390791005622422471
 BoxCollider2D:
@@ -567,79 +965,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!1001 &3224906026558675703
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 3224906026280767920, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
-      propertyPath: m_RootOrder
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 3224906026280767920, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -0.115
-      objectReference: {fileID: 0}
-    - target: {fileID: 3224906026280767920, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -0.007
-      objectReference: {fileID: 0}
-    - target: {fileID: 3224906026280767920, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -10
-      objectReference: {fileID: 0}
-    - target: {fileID: 3224906026280767920, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3224906026280767920, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3224906026280767920, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3224906026280767920, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3224906026280767920, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3224906026280767920, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3224906026280767920, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3224906026280767921, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
-      propertyPath: tankColor.b
-      value: 0.020924425
-      objectReference: {fileID: 0}
-    - target: {fileID: 3224906026280767921, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
-      propertyPath: tankColor.g
-      value: 0.8301887
-      objectReference: {fileID: 0}
-    - target: {fileID: 3224906026280767921, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
-      propertyPath: tankColor.r
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3224906026280767922, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
-      propertyPath: m_Name
-      value: Tank
-      objectReference: {fileID: 0}
-    - target: {fileID: 3224906026280767922, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
 --- !u!4 &4147873376499500856
 Transform:
   m_ObjectHideFlags: 0
@@ -724,7 +1049,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &4807313431724497070
 SpriteRenderer:

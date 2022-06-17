@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -6,35 +7,119 @@ using UnityEngine.InputSystem;
 
 public class TankController : MonoBehaviour {
     public Color tankColor;
-    private Vector2 movement, rotation;
-    private Rigidbody2D rb;
+    [SerializeField] private Transform shootPoint;
+    public TankType type;
+    private float _movement, _rotation;
+    private Rigidbody2D _rb;
 
-    // Start is called before the first frame update
+    private int _currentMagSize;
+    private int _currentMagSizeMax;
+    private int _reloadTimer;
+
+    [HideInInspector] public InputAction move;
+    [HideInInspector] public InputAction rotate;
+
+        // Start is called before the first frame update
+    public void RegisterInputActions() {
+        
+    }
     void Start() {
+        _currentMagSize = GameManager.Instance.defaultMagazineSize;
+        _currentMagSizeMax = GameManager.Instance.defaultMagazineSize;
         SpriteRenderer[] children = gameObject.GetComponentsInChildren<SpriteRenderer>();
-        rb = gameObject.GetComponent<Rigidbody2D>();
+        _rb = gameObject.GetComponent<Rigidbody2D>();
         for (int index = 0; index < children.Length; index++) {
             SpriteRenderer child = children[index];
             float percent = index == 0 ? 1f : index == 1 ? 0.69f : 0.55f;
             child.color = new Color(tankColor.r * percent, tankColor.g * percent, tankColor.b * percent, tankColor.a);
         }
     }
-    
+
     private void FixedUpdate() {
-        transform.Rotate(0, 0, rotation.x * GameManager.instance.rotationSpeed);
-        var up = transform.TransformDirection(Vector3.up);
-        rb.AddForce(movement * GameManager.instance.moveSpeed * Time.fixedDeltaTime * up);
+        transform.Rotate(0, 0, -_rotation * GameManager.Instance.rotationSpeed);
+        Vector2 direction = transform.up;
+        _rb.velocity = (_movement * direction * Time.fixedDeltaTime * GameManager.Instance.moveSpeed);
+
+        if (_currentMagSize <= 0 || _reloadTimer > 0) {
+            if (_reloadTimer <= 0) {
+                _reloadTimer = GameManager.Instance.reloadTimerTicks;
+                //Debug.Log("reloadTimer now set to: " + reloadTimer);
+                _currentMagSize = _currentMagSizeMax;
+                //Debug.Log("currentMagSize now set to: " + currentMagSize);
+            }
+            else {
+                _reloadTimer--;
+                //Debug.Log("reloadTimer now set to: " + reloadTimer);
+            }
+        }
     }
 
     public void Fire(InputAction.CallbackContext context) {
-        Debug.Log("Fire!");
+        if (context.performed) {
+            //Debug.Log("Fire!");
+            if (_currentMagSize > 0 && _reloadTimer <= 0) {
+                Vector3 diffrence = shootPoint.position - transform.position;
+                float distance = diffrence.magnitude;
+                Vector2 direction = diffrence / distance;
+                direction.Normalize();
+
+                GameObject bullet = Instantiate(GameManager.Instance.bulletPrefab, shootPoint.position,
+                    transform.rotation);
+                bullet.GetComponent<Rigidbody2D>().velocity = direction * GameManager.Instance.bulletSpeed;
+
+                FindObjectOfType<AudioManager>().Play("Shoot", 1);
+
+                _currentMagSize--;
+                //Debug.Log("currentMagSize now set to: " + currentMagSize);
+            }
+        }
     }
+
+    private void Update() {
+        _movement = move.ReadValue<float>();
+        //Debug.Log("moving " + _movement);
+        _rotation = rotate.ReadValue<float>();
+        //Debug.Log("rotating " + _rotation);
+    }
+
     public void Move(InputAction.CallbackContext context) {
-        movement = context.ReadValue<Vector2>();
-        Debug.Log("Moving! " + movement);
+        if (context.performed) {
+            
+        }
     }
+
     public void Rotate(InputAction.CallbackContext context) {
-        rotation = context.ReadValue<Vector2>();
-        Debug.Log("Rotating! " + rotation);
+        if (context.performed) {
+            
+        }
+        //Debug.Log("Rotating! " + rotation);
+    }
+}
+
+public enum TankType {
+    FIRST,
+    SECOND,
+    THIRD,
+    FOURTH,
+    FIFTH
+}
+
+//https://stackoverflow.com/questions/5985661/methods-inside-enum-in-c-sharp
+public static class TankTypeMethods {
+    public static TankType GetTankType(this int number) {
+        switch (number) {
+            case 1:
+                return TankType.FIRST;
+            case 2:
+                return TankType.SECOND;
+            case 3:
+                return TankType.THIRD;
+            case 4:
+                return TankType.FOURTH;
+            case 5:
+                return TankType.FIFTH;
+            default:
+                return TankType.FIRST;  
+        }
     }
 }

@@ -8,6 +8,7 @@ public class Bullet : MonoBehaviour {
     private Rigidbody2D rigidbody2D;
     private int invulnerableTimer;
     private int despawnTimer = 0;
+
     void Start() {
         circleCollider2D = GetComponent<CircleCollider2D>();
         rigidbody2D = GetComponent<Rigidbody2D>();
@@ -18,9 +19,11 @@ public class Bullet : MonoBehaviour {
         if (invulnerableTimer > 0) {
             invulnerableTimer--;
         }
+
         if (despawnTimer > GameManager.Instance.despawnTimerTicks) {
             Destroy(gameObject);
-        } else {
+        }
+        else {
             despawnTimer++;
         }
     }
@@ -32,5 +35,13 @@ public class Bullet : MonoBehaviour {
             FindObjectOfType<AudioManager>().Play("Explode", 1);
             GameManager.Instance.CheckWin();
         }
+        // else if (col.gameObject.CompareTag("Walls")) {
+        //     ContactPoint2D point = col.contacts[0];
+        //     Vector2 newDir;
+        //     Vector2 curDire = transform.TransformDirection(Vector2.up);
+        //
+        //     newDir = Vector2.Reflect(curDire, point.normal);
+        //     transform.rotation = Quaternion.FromToRotation(Vector2.up, newDir);
+        // }
     }
 }

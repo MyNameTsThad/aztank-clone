@@ -18,11 +18,8 @@ public class TankController : MonoBehaviour {
 
     [HideInInspector] public InputAction move;
     [HideInInspector] public InputAction rotate;
+    [HideInInspector] public InputAction fire;
 
-        // Start is called before the first frame update
-    public void RegisterInputActions() {
-        
-    }
     void Start() {
         _currentMagSize = GameManager.Instance.defaultMagazineSize;
         _currentMagSizeMax = GameManager.Instance.defaultMagazineSize;
@@ -33,6 +30,19 @@ public class TankController : MonoBehaviour {
             float percent = index == 0 ? 1f : index == 1 ? 0.69f : 0.55f;
             child.color = new Color(tankColor.r * percent, tankColor.g * percent, tankColor.b * percent, tankColor.a);
         }
+
+        fire.performed += Fire;
+    }
+
+    private void OnDestroy() {
+        //unbind inputs
+        //move.Disable();
+        //rotate.Disable();
+        fire.performed -= Fire;
+        //fire.Disable();
+        move = null;
+        rotate = null;
+        fire = null;
     }
 
     private void FixedUpdate() {
@@ -55,7 +65,7 @@ public class TankController : MonoBehaviour {
     }
 
     public void Fire(InputAction.CallbackContext context) {
-        if (context.performed) {
+        if (context.performed && GameManager.Instance.gameState != GameState.WIN) {
             //Debug.Log("Fire!");
             if (_currentMagSize > 0 && _reloadTimer <= 0) {
                 Vector3 diffrence = shootPoint.position - transform.position;
@@ -80,19 +90,6 @@ public class TankController : MonoBehaviour {
         //Debug.Log("moving " + _movement);
         _rotation = rotate.ReadValue<float>();
         //Debug.Log("rotating " + _rotation);
-    }
-
-    public void Move(InputAction.CallbackContext context) {
-        if (context.performed) {
-            
-        }
-    }
-
-    public void Rotate(InputAction.CallbackContext context) {
-        if (context.performed) {
-            
-        }
-        //Debug.Log("Rotating! " + rotation);
     }
 }
 

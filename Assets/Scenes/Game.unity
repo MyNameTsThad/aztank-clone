@@ -302,12 +302,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 747059378a8e6c87abd7f77c77d9e9a6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameState: 0
   dotPrefab: {fileID: 2860461401351668816, guid: a0d435fbe3e2bea43aa66b75afca1821, type: 3}
   wallPrefab: {fileID: 1853213952635902157, guid: 8532e0c656dfa944b8e4f6292b8a62ff, type: 3}
   tankPrefab: {fileID: 3224906026280767922, guid: 1b95188551bd2d4b0a2673c0f86541d7, type: 3}
   bulletPrefab: {fileID: 8944481924664981165, guid: 654c3eb477330bb7d9a4066c41c52edb, type: 3}
   sideLength: 9
-  players: 3
+  players: 2
   tankColors:
   - {r: 0, g: 0, b: 1, a: 1}
   - {r: 1, g: 0, b: 0, a: 1}
@@ -321,6 +322,8 @@ MonoBehaviour:
   despawnTimerTicks: 500
   reloadTimerTicks: 250
   defaultMagazineSize: 10
+  passSoundTime: 3
+  reloadTime: 2
   tanksMoveAction:
   - m_Name: Input Action
     m_Type: 0
@@ -605,7 +608,7 @@ MonoBehaviour:
     m_SingletonActionBindings:
     - m_Name: 
       m_Id: 141a9980-5224-4e79-84e7-fd9c5cbc4ab5
-      m_Path: <Keyboard>/y
+      m_Path: <Keyboard>/quote
       m_Interactions: 
       m_Processors: 
       m_Groups: 

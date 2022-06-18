@@ -11,7 +11,9 @@ public class GameManager : MonoBehaviour {
     public static GameManager Instance { get; private set; }
     private GameObject board;
 
-    [Header("Prefabs")] public GameObject dotPrefab;
+    [Space(10)] public GameState gameState;
+    [Space(10)] [Header("Prefabs")] public GameObject dotPrefab;
+
     public GameObject wallPrefab;
     public GameObject tankPrefab;
     public GameObject bulletPrefab;
@@ -35,6 +37,12 @@ public class GameManager : MonoBehaviour {
     [Tooltip("Each tank's default bullet storage size.")]
     public int defaultMagazineSize = 10;
 
+    [Tooltip("Time from the second last tank dies and the 'Pass' sound plays, In Seconds")]
+    public int passSoundTime = 3;
+
+    [Tooltip("Time from the the 'Pass' sound plays and the game Reloading, In Seconds")]
+    public int reloadTime = 2;
+
     [Header("Input")] public InputAction[] tanksMoveAction;
     public InputAction[] tanksRotateAction;
     public InputAction[] tanksShootAction;
@@ -54,6 +62,9 @@ public class GameManager : MonoBehaviour {
 
     // Start is called before the first frame update
     private void Start() {
+        //keep this here for now
+        gameState = GameState.PLAYING;
+
         board = GameObject.FindGameObjectWithTag("Board");
         corners = GameObject.FindGameObjectsWithTag("Corners");
 
@@ -89,7 +100,7 @@ public class GameManager : MonoBehaviour {
 
             tank.GetComponent<TankController>().tankColor = tankColors[i];
             tank.GetComponent<TankController>().type = (i + 1).GetTankType();
-            
+
             var inputMoveAction = tanksMoveAction[i];
             inputMoveAction.Enable();
             tank.GetComponent<TankController>().move = inputMoveAction;
@@ -98,7 +109,7 @@ public class GameManager : MonoBehaviour {
             tank.GetComponent<TankController>().rotate = inputRotationAction;
             var inputFireAction = tanksShootAction[i];
             inputFireAction.Enable();
-            inputFireAction.performed += tank.GetComponent<TankController>().Fire;
+            tank.GetComponent<TankController>().fire = inputFireAction;
         }
     }
 
@@ -140,20 +151,100 @@ public class GameManager : MonoBehaviour {
         }
     }
 
+    public IEnumerator WinDelay() {
+        yield return new WaitForSeconds(passSoundTime);
+        //check for tanks left
+        if (GameObject.FindGameObjectsWithTag("Player").Length == 1) {
+            FindObjectOfType<AudioManager>().Play("Pass", 1);
+            foreach (var bullet in GameObject.FindGameObjectsWithTag("Bullets")) {
+                bullet.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+            }
+            yield return new WaitForSeconds(reloadTime);
+            Debug.Log("reloading!");
+            NewGame();
+        }
+    }
+
     public void ResetBoard(InputAction.CallbackContext context) {
         if (context.performed) {
-            Debug.Log("Resetting!");
-            // float diffrenceX = Math.Abs(corners[1].transform.position.x - corners[0].transform.position.x);
-            // float diffrenceY = Math.Abs(corners[1].transform.position.y - corners[0].transform.position.y);
-            // DeleteMaze();
-            // GenerateMaze(diffrenceX, diffrenceY);
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            NewGame();
+        }
+    }
+
+    public void NewGame() {
+        Debug.Log("Starting new Game!");
+        foreach (var wall in GameObject.FindGameObjectsWithTag("Walls")) {
+            Destroy(wall);
+        }
+        foreach (var tank in GameObject.FindGameObjectsWithTag("Player")) {
+            Destroy(tank);
+        }
+        foreach (var bullet in GameObject.FindGameObjectsWithTag("Bullets")) {
+            Destroy(bullet);
+        }
+        
+        gameState = GameState.PLAYING;
+
+        board = GameObject.FindGameObjectWithTag("Board");
+        corners = GameObject.FindGameObjectsWithTag("Corners");
+
+        float differenceX = Math.Abs(corners[1].transform.position.x - corners[0].transform.position.x);
+        float differenceY = Math.Abs(corners[1].transform.position.y - corners[0].transform.position.y);
+
+        //populate board with dots
+        for (var i = 0; i < sideLength + 1; i++) {
+            for (var j = 0; j < sideLength + 1; j++) {
+                GameObject dot = Instantiate(dotPrefab);
+                dot.transform.position = new Vector3(corners[1].transform.position.x + differenceX / sideLength * i,
+                    corners[1].transform.position.y + differenceY / sideLength * j, 0);
+            }
+        }
+
+        //populate the maze
+        GenerateMaze(differenceX, differenceY);
+        
+        //spawn tanks
+        for (int i = 0; i < players; i++) {
+            GameObject tank = Instantiate(tankPrefab);
+            var rand = new System.Random();
+            int randX = rand.Next(1, 9), randY = rand.Next(1, 9);
+            float variationX = Random.Range(-0.3f, 0.3f), variationY = Random.Range(-0.3f, 0.3f);
+            float randRot = Random.Range(0f, 360f);
+
+            //gen the center point
+            tank.transform.position = new Vector3(
+                corners[1].transform.position.x - 0.5f + variationX + differenceX / sideLength * randX,
+                corners[1].transform.position.y - 0.5f + variationY + differenceY / sideLength * randY,
+                0);
+            tank.transform.rotation = Quaternion.Euler(0, 0, randRot);
+
+            tank.GetComponent<TankController>().tankColor = tankColors[i];
+            tank.GetComponent<TankController>().type = (i + 1).GetTankType();
+
+            var inputMoveAction = tanksMoveAction[i];
+            inputMoveAction.Enable();
+            tank.GetComponent<TankController>().move = inputMoveAction;
+            var inputRotationAction = tanksRotateAction[i];
+            inputRotationAction.Enable();
+            tank.GetComponent<TankController>().rotate = inputRotationAction;
+            var inputFireAction = tanksShootAction[i];
+            inputFireAction.Enable();
+            tank.GetComponent<TankController>().fire = inputFireAction;
         }
     }
 
     public void CheckWin() {
         if (GameObject.FindGameObjectsWithTag("Player").Length == 2) {
-            FindObjectOfType<AudioManager>().Play("Pass", 1);
+            Debug.Log("One Tank Left!");
+            gameState = GameState.WIN;
+            StartCoroutine(WinDelay());
         }
     }
+}
+
+public enum GameState {
+    MENU,
+    PLAYING,
+    WIN,
+    WAITING_NEW_GAME
 }

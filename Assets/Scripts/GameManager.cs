@@ -47,7 +47,12 @@ public class GameManager : MonoBehaviour {
     public InputAction[] tanksRotateAction;
     public InputAction[] tanksShootAction;
 
+    [Header("Gameplay-related public variables")]
+    public int[] scores;
+    
     private GameObject[] corners;
+    
+    
 
     private void Awake() {
         // If there is an instance, and it's not me, delete myself.
@@ -82,6 +87,9 @@ public class GameManager : MonoBehaviour {
 
         //populate the maze
         GenerateMaze(differenceX, differenceY);
+        
+        scores = new int[players];
+        Array.Fill(scores, 0);
 
         //spawn tanks
         for (int i = 0; i < players; i++) {
@@ -99,7 +107,7 @@ public class GameManager : MonoBehaviour {
             tank.transform.rotation = Quaternion.Euler(0, 0, randRot);
 
             tank.GetComponent<TankController>().tankColor = tankColors[i];
-            tank.GetComponent<TankController>().type = (i + 1).GetTankType();
+            tank.GetComponent<TankController>().scoreIndex = i;
 
             var inputMoveAction = tanksMoveAction[i];
             inputMoveAction.Enable();
@@ -154,15 +162,22 @@ public class GameManager : MonoBehaviour {
     public IEnumerator WinDelay() {
         yield return new WaitForSeconds(passSoundTime);
         //check for tanks left
-        if (GameObject.FindGameObjectsWithTag("Player").Length == 1) {
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        if (players.Length == 1) {
             FindObjectOfType<AudioManager>().Play("Pass", 1);
-            foreach (var bullet in GameObject.FindGameObjectsWithTag("Bullets")) {
-                bullet.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
-            }
-            yield return new WaitForSeconds(reloadTime);
-            Debug.Log("reloading!");
-            NewGame();
+            gameState = GameState.WIN2;
+            TankController controller = players[0].GetComponent<TankController>();
+            scores[controller.scoreIndex] += 1;
+            Debug.Log("Tank " + controller.scoreIndex + " score is now " + scores[controller.scoreIndex]);
         }
+
+        foreach (var bullet in GameObject.FindGameObjectsWithTag("Bullets")) {
+            bullet.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+        }
+
+        yield return new WaitForSeconds(reloadTime);
+        Debug.Log("reloading!");
+        NewGame();
     }
 
     public void ResetBoard(InputAction.CallbackContext context) {
@@ -176,13 +191,15 @@ public class GameManager : MonoBehaviour {
         foreach (var wall in GameObject.FindGameObjectsWithTag("Walls")) {
             Destroy(wall);
         }
+
         foreach (var tank in GameObject.FindGameObjectsWithTag("Player")) {
             Destroy(tank);
         }
+
         foreach (var bullet in GameObject.FindGameObjectsWithTag("Bullets")) {
             Destroy(bullet);
         }
-        
+
         gameState = GameState.PLAYING;
 
         board = GameObject.FindGameObjectWithTag("Board");
@@ -202,7 +219,10 @@ public class GameManager : MonoBehaviour {
 
         //populate the maze
         GenerateMaze(differenceX, differenceY);
-        
+
+        //scores = new int[players];
+        //Array.Fill(scores, 0);
+
         //spawn tanks
         for (int i = 0; i < players; i++) {
             GameObject tank = Instantiate(tankPrefab);
@@ -219,7 +239,7 @@ public class GameManager : MonoBehaviour {
             tank.transform.rotation = Quaternion.Euler(0, 0, randRot);
 
             tank.GetComponent<TankController>().tankColor = tankColors[i];
-            tank.GetComponent<TankController>().type = (i + 1).GetTankType();
+            tank.GetComponent<TankController>().scoreIndex = i;
 
             var inputMoveAction = tanksMoveAction[i];
             inputMoveAction.Enable();
@@ -236,7 +256,7 @@ public class GameManager : MonoBehaviour {
     public void CheckWin() {
         if (GameObject.FindGameObjectsWithTag("Player").Length == 2) {
             Debug.Log("One Tank Left!");
-            gameState = GameState.WIN;
+            gameState = GameState.WIN1;
             StartCoroutine(WinDelay());
         }
     }
@@ -245,6 +265,7 @@ public class GameManager : MonoBehaviour {
 public enum GameState {
     MENU,
     PLAYING,
-    WIN,
+    WIN1,
+    WIN2,
     WAITING_NEW_GAME
 }

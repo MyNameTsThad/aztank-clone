@@ -8,7 +8,8 @@ using UnityEngine.InputSystem;
 public class TankController : MonoBehaviour {
     public Color tankColor;
     [SerializeField] private Transform shootPoint;
-    public TankType type;
+    public int scoreIndex;
+    
     private float _movement, _rotation;
     private Rigidbody2D _rb;
 
@@ -48,7 +49,7 @@ public class TankController : MonoBehaviour {
     private void FixedUpdate() {
         transform.Rotate(0, 0, -_rotation * GameManager.Instance.rotationSpeed);
         Vector2 direction = transform.up;
-        _rb.velocity = (_movement * direction * Time.fixedDeltaTime * GameManager.Instance.moveSpeed);
+        _rb.velocity = GameManager.Instance.gameState != GameState.WIN2 ? direction * (_movement * Time.fixedDeltaTime * GameManager.Instance.moveSpeed) : Vector3.zero;
 
         if (_currentMagSize <= 0 || _reloadTimer > 0) {
             if (_reloadTimer <= 0) {
@@ -65,7 +66,7 @@ public class TankController : MonoBehaviour {
     }
 
     public void Fire(InputAction.CallbackContext context) {
-        if (context.performed && GameManager.Instance.gameState != GameState.WIN) {
+        if (context.performed && (GameManager.Instance.gameState != GameState.WIN1 | GameManager.Instance.gameState != GameState.WIN2)) {
             //Debug.Log("Fire!");
             if (_currentMagSize > 0 && _reloadTimer <= 0) {
                 Vector3 diffrence = shootPoint.position - transform.position;
@@ -90,33 +91,5 @@ public class TankController : MonoBehaviour {
         //Debug.Log("moving " + _movement);
         _rotation = rotate.ReadValue<float>();
         //Debug.Log("rotating " + _rotation);
-    }
-}
-
-public enum TankType {
-    FIRST,
-    SECOND,
-    THIRD,
-    FOURTH,
-    FIFTH
-}
-
-//https://stackoverflow.com/questions/5985661/methods-inside-enum-in-c-sharp
-public static class TankTypeMethods {
-    public static TankType GetTankType(this int number) {
-        switch (number) {
-            case 1:
-                return TankType.FIRST;
-            case 2:
-                return TankType.SECOND;
-            case 3:
-                return TankType.THIRD;
-            case 4:
-                return TankType.FOURTH;
-            case 5:
-                return TankType.FIFTH;
-            default:
-                return TankType.FIRST;  
-        }
     }
 }

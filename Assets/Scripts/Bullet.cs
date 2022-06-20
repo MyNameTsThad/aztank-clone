@@ -31,9 +31,12 @@ public class Bullet : MonoBehaviour {
     private void OnCollisionEnter2D(Collision2D col) {
         if (col.gameObject.CompareTag("Player") && invulnerableTimer <= 0) {
             Destroy(gameObject);
-            Destroy(col.gameObject);
-            FindObjectOfType<AudioManager>().Play("Explode", 1);
-            GameManager.Instance.CheckWin();
+            if (GameManager.Instance.lethalBullets) {
+                col.gameObject.tag = "Dead";
+                FindObjectOfType<AudioManager>().Play("Explode", 1);
+                GameManager.Instance.CheckWin();
+                StartCoroutine(col.gameObject.GetComponent<TankController>().DeathAnimation());
+            }
         }
         // else if (col.gameObject.CompareTag("Walls")) {
         //     ContactPoint2D point = col.contacts[0];

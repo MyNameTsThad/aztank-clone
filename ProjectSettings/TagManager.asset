@@ -8,6 +8,8 @@ TagManager:
   - Corners
   - Walls
   - Bullets
+  - Powerups
+  - Dead
   layers:
   - Default
   - TransparentFX

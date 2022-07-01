@@ -5,11 +5,13 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
+using Random = UnityEngine.Random;
 
 public class TankController : MonoBehaviour {
     public Color tankColor;
     [SerializeField] private Transform shootPoint;
-    public int scoreIndex;
+    [SerializeField] private Transform missileShootPoint;
+    [HideInInspector] public int scoreIndex;
     public PowerupType currentPowerUp;
 
     private float _movement, _rotation;
@@ -17,7 +19,8 @@ public class TankController : MonoBehaviour {
 
     private bool alive = true;
 
-    private int _currentMagSize;
+    [HideInInspector] [FormerlySerializedAs("_currentMagSize")]
+    public int currentMagSize;
 
     [FormerlySerializedAs("_currentSpraySize")] [HideInInspector]
     public int currentSpraySize;
@@ -26,16 +29,21 @@ public class TankController : MonoBehaviour {
     public int currentMagSizeMax;
 
     [HideInInspector] public int maxReloadTimer;
-    private int _reloadTimer;
 
     [HideInInspector] public InputAction move;
     [HideInInspector] public InputAction rotate;
     [HideInInspector] public InputAction fire;
 
+    private int _reloadTimer;
+    private bool _controllingMissile;
+    private bool hitting = false;
+    private GameObject hitObject;
+
     void Start() {
         alive = true;
+        _controllingMissile = false;
         currentPowerUp = PowerupType.NONE;
-        _currentMagSize = GameManager.Instance.defaultMagazineSize;
+        currentMagSize = GameManager.Instance.defaultMagazineSize;
         currentMagSizeMax = GameManager.Instance.defaultMagazineSize;
         currentSpraySize = 0;
         maxReloadTimer = GameManager.Instance.reloadTimerTicks;
@@ -45,7 +53,8 @@ public class TankController : MonoBehaviour {
             SpriteRenderer child = children[index];
             if (child.transform.name != "Explosion") {
                 float percent = index == 0 ? 1f : index == 1 ? 0.69f : 0.55f;
-                child.color = new Color(tankColor.r * percent, tankColor.g * percent, tankColor.b * percent, tankColor.a);
+                child.color = new Color(tankColor.r * percent, tankColor.g * percent, tankColor.b * percent,
+                    tankColor.a);
             }
         }
 
@@ -72,11 +81,12 @@ public class TankController : MonoBehaviour {
                 ? direction * (_movement * Time.fixedDeltaTime * GameManager.Instance.moveSpeed)
                 : Vector3.zero;
 
-            if (_currentMagSize <= 0 || _reloadTimer > 0) {
+            if (currentMagSize <= 0 || _reloadTimer > 0) {
                 if (_reloadTimer <= 0) {
                     _reloadTimer = maxReloadTimer;
                     //Debug.Log("reloadTimer now set to: " + reloadTimer);
-                    _currentMagSize = currentMagSizeMax;
+                    if (currentPowerUp == PowerupType.MACHINEGUN) currentPowerUp = PowerupType.NONE;
+                    currentMagSize = currentMagSizeMax;
                     //Debug.Log("currentMagSize now set to: " + currentMagSize);
                 }
                 else {
@@ -105,7 +115,7 @@ public class TankController : MonoBehaviour {
                                   GameManager.Instance.gameState != GameState.WIN2) &&
             alive) {
             //Debug.Log("Fire!");
-            if (_currentMagSize > 0 && _reloadTimer <= 0) {
+            if (currentMagSize > 0 && _reloadTimer <= 0) {
                 Vector3 diffrence = shootPoint.position - transform.position;
                 float distance = diffrence.magnitude;
                 Vector2 direction = diffrence / distance;
@@ -130,17 +140,61 @@ public class TankController : MonoBehaviour {
                     bullet3.GetComponent<Rigidbody2D>().velocity =
                         bullet3.transform.up * GameManager.Instance.bulletSpeed;
                     currentSpraySize--;
+                    if (currentSpraySize <= 0) {
+                        currentPowerUp = PowerupType.NONE;
+                    }
+
+                    FindObjectOfType<AudioManager>().Play("Shoot", 1);
+                    currentMagSize--;
+                }
+                else if (currentPowerUp == PowerupType.MACHINEGUN) {
+                    Vector3 shootPointPos = shootPoint.position;
+                    var transform1 = transform;
+                    Vector3 lea = transform1.localEulerAngles;
+                    for (int i = 0; i < GameManager.Instance.machineGunBullets; i++) {
+                        Quaternion shootPointRot = Quaternion.Euler(lea.x, lea.y,
+                            lea.z + Random.Range(-GameManager.Instance.sprayMachineGunVariation,
+                                GameManager.Instance.sprayMachineGunVariation));
+                        GameObject bullet1 = Instantiate(GameManager.Instance.bulletPrefab, shootPointPos,
+                            shootPointRot);
+                        bullet1.GetComponent<Rigidbody2D>().velocity =
+                            bullet1.transform.up * GameManager.Instance.bulletSpeed * 1.5f;
+                        bullet1.transform.localScale = new Vector3(bullet1.transform.localScale.x / 2f,
+                            bullet1.transform.localScale.y / 2f,
+                            bullet1.transform.localScale.z / 2f);
+                    }
+
+                    FindObjectOfType<AudioManager>().Play("Shoot", 1);
+                    currentMagSize--;
+                }
+                else if (currentPowerUp == PowerupType.WIFI) {
+                    GameObject missile = Instantiate(GameManager.Instance.missilePrefab, missileShootPoint.position,
+                        transform.rotation);
+                    missile.GetComponent<Rigidbody2D>().velocity =
+                        missile.transform.up * GameManager.Instance.missileSpeed * Time.fixedDeltaTime;
+                    missile.GetComponent<Missile>().owner = this;
+                    missile.GetComponent<Missile>().rotateAction = rotate;
+                    missile.GetComponent<Missile>().controlType = ControlType.MANUAL;
+                    _controllingMissile = true;
+                    currentPowerUp = PowerupType.NONE;
+                }
+                else if (currentPowerUp == PowerupType.WALLDESTROY) {
+                    RaycastHit2D hit = Physics2D.Raycast(shootPoint.position, transform.up, GameManager.Instance.wallLayerMask);
+                    if (hit && hit.collider.gameObject.CompareTag("Walls")) {
+                        Destroy(hit.collider.gameObject);
+                    }
+                    currentPowerUp = PowerupType.NONE;
                 }
                 else {
-                    GameObject bullet = Instantiate(GameManager.Instance.bulletPrefab, shootPoint.position,
-                        transform.rotation);
-                    bullet.GetComponent<Rigidbody2D>().velocity =
-                        bullet.transform.up * GameManager.Instance.bulletSpeed;
+                    if (!_controllingMissile) {
+                        GameObject bullet = Instantiate(GameManager.Instance.bulletPrefab, shootPoint.position,
+                            transform.rotation);
+                        bullet.GetComponent<Rigidbody2D>().velocity =
+                            bullet.transform.up * GameManager.Instance.bulletSpeed;
+                        FindObjectOfType<AudioManager>().Play("Shoot", 1);
+                        currentMagSize--;
+                    }
                 }
-
-                FindObjectOfType<AudioManager>().Play("Shoot", 1);
-
-                _currentMagSize--;
                 //Debug.Log("currentMagSize now set to: " + currentMagSize);
             }
         }
@@ -148,14 +202,24 @@ public class TankController : MonoBehaviour {
 
     private void Update() {
         if (alive) {
-            if (currentSpraySize <= 0) {
-                currentPowerUp = PowerupType.NONE;
-            }
-
-            if (move != null && rotate != null) {
+            if (move != null && rotate != null && !_controllingMissile) {
                 _movement = move.ReadValue<float>();
                 _rotation = rotate.ReadValue<float>();
             }
+
+            transform.Find("Cannon").gameObject.SetActive(!_controllingMissile);
+            
+            if (currentPowerUp == PowerupType.WALLDESTROY) {
+                RaycastHit2D hit = Physics2D.Raycast(shootPoint.position, transform.up, GameManager.Instance.wallLayerMask);
+                if (hit && hit.collider.gameObject.CompareTag("Walls")) {
+                    GameObject hitObject = hit.collider.gameObject;
+                    hitObject.GetComponent<SpriteRenderer>().color = Color.red;
+                }
+            }
         }
+    }
+
+    public void ReturnControl() {
+        _controllingMissile = false;
     }
 }

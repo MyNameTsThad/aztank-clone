@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour {
     public GameObject tankPrefab;
     public GameObject bulletPrefab;
     public GameObject powerupPrefab;
+    public GameObject missilePrefab;
     [Space(5)] public Sprite bigBallSprite;
     public Sprite bombSprite;
     public Sprite laserSprite;
@@ -47,6 +48,7 @@ public class GameManager : MonoBehaviour {
     public float moveSpeed = 3f;
     public float rotationSpeed = 1f;
     public float bulletSpeed = 10f;
+    public float missileSpeed = 10f;
 
     [Tooltip("Invulnerability Timer, In ticks (50 Ticks Per Second)")]
     public int invulnerableTimer = 5;
@@ -77,6 +79,12 @@ public class GameManager : MonoBehaviour {
     
     [Tooltip("imm too lazy to auto detect the animation time ok")]
     public float deathAnimationTime = 0.25f;
+    
+    [Tooltip("Wall's layer mask.")]
+    public LayerMask wallLayerMask;
+    
+    [Tooltip("Which wall names to blacklist.")]
+    public List<string> blacklistWallNames;
 
     [Header("Input")] public InputAction[] tanksMoveAction;
     public InputAction[] tanksRotateAction;
@@ -90,6 +98,11 @@ public class GameManager : MonoBehaviour {
 
     [Tooltip("SPRAY Powerup's spray variation.")]
     public float sprayVariation = 0.1f;
+    
+    [Tooltip("MACHINEGUN Powerup's spray variation.")]
+    public float sprayMachineGunVariation = 15f;
+    [Tooltip("How many bullets the MACHINEGUN Powerup shoots at a time.")]
+    public int machineGunBullets = 2;
 
     private GameObject[] corners;
 
@@ -104,7 +117,6 @@ public class GameManager : MonoBehaviour {
             DontDestroyOnLoad(Instance);
         }
     }
-
     // Start is called before the first frame update
     private void Start() {
         //keep this here for now
@@ -180,7 +192,8 @@ public class GameManager : MonoBehaviour {
 
                 if (reverse) {
                     if (cell.HasFlag(WallState.UP) && Random.Range(1, mazeDestroyPercent) == 1 &&
-                        !noSpawn.Contains(getOppositeWallName("Wall " + i + " " + j + " UP", "UP"))) {
+                        !noSpawn.Contains(getOppositeWallName("Wall " + i + " " + j + " UP", "UP")) &&
+                        !blacklistWallNames.Contains("Wall " + i + " " + j + " UP")) {
                         GameObject wall = Instantiate(wallPrefab);
                         wall.transform.position = new Vector3(dotPosX, dotPosY + boxSize, 0);
                         wall.transform.rotation = Quaternion.Euler(0, 0, 90);
@@ -189,7 +202,8 @@ public class GameManager : MonoBehaviour {
                     }
 
                     if (cell.HasFlag(WallState.DOWN) && Random.Range(1, mazeDestroyPercent) == 1 &&
-                        !noSpawn.Contains(getOppositeWallName("Wall " + i + " " + j + " DOWN", "DOWN"))) {
+                        !noSpawn.Contains(getOppositeWallName("Wall " + i + " " + j + " DOWN", "DOWN")) &&
+                        !blacklistWallNames.Contains("Wall " + i + " " + j + " DOWN")) {
                         GameObject wall = Instantiate(wallPrefab);
                         wall.transform.position = new Vector3(dotPosX, dotPosY - boxSize, 0);
                         wall.transform.rotation = Quaternion.Euler(0, 0, 90);
@@ -198,7 +212,8 @@ public class GameManager : MonoBehaviour {
                     }
 
                     if (cell.HasFlag(WallState.LEFT) && Random.Range(1, mazeDestroyPercent) == 1 &&
-                        !noSpawn.Contains(getOppositeWallName("Wall " + i + " " + j + " LEFT", "LEFT"))) {
+                        !noSpawn.Contains(getOppositeWallName("Wall " + i + " " + j + " LEFT", "LEFT")) &&
+                        !blacklistWallNames.Contains("Wall " + i + " " + j + " LEFT")) {
                         GameObject wall = Instantiate(wallPrefab);
                         wall.transform.position = new Vector3(dotPosX - boxSize, dotPosY, 0);
                         wall.name = "Wall " + i + " " + j + " LEFT";
@@ -206,7 +221,8 @@ public class GameManager : MonoBehaviour {
                     }
 
                     if (cell.HasFlag(WallState.RIGHT) && Random.Range(1, mazeDestroyPercent) == 1 &&
-                        !noSpawn.Contains(getOppositeWallName("Wall " + i + " " + j + " RIGHT", "RIGHT"))) {
+                        !noSpawn.Contains(getOppositeWallName("Wall " + i + " " + j + " RIGHT", "RIGHT")) &&
+                        !blacklistWallNames.Contains("Wall " + i + " " + j + " RIGHT")) {
                         GameObject wall = Instantiate(wallPrefab);
                         wall.transform.position = new Vector3(dotPosX + boxSize, dotPosY, 0);
                         wall.name = "Wall " + i + " " + j + " RIGHT";
@@ -215,7 +231,8 @@ public class GameManager : MonoBehaviour {
                 }
                 else {
                     if (cell.HasFlag(WallState.UP) && Random.Range(1, mazeDestroyPercent) != 1 &&
-                        !noSpawn.Contains(getOppositeWallName("Wall " + i + " " + j + " UP", "UP"))) {
+                        !noSpawn.Contains(getOppositeWallName("Wall " + i + " " + j + " UP", "UP")) &&
+                        !blacklistWallNames.Contains("Wall " + i + " " + j + " UP")) {
                         GameObject wall = Instantiate(wallPrefab);
                         wall.transform.position = new Vector3(dotPosX, dotPosY + boxSize, 0);
                         wall.transform.rotation = Quaternion.Euler(0, 0, 90);
@@ -224,7 +241,8 @@ public class GameManager : MonoBehaviour {
                     }
 
                     if (cell.HasFlag(WallState.DOWN) && Random.Range(1, mazeDestroyPercent) != 1 &&
-                        !noSpawn.Contains(getOppositeWallName("Wall " + i + " " + j + " DOWN", "DOWN"))) {
+                        !noSpawn.Contains(getOppositeWallName("Wall " + i + " " + j + " DOWN", "DOWN")) &&
+                        !blacklistWallNames.Contains("Wall " + i + " " + j + " DOWN")) {
                         GameObject wall = Instantiate(wallPrefab);
                         wall.transform.position = new Vector3(dotPosX, dotPosY - boxSize, 0);
                         wall.transform.rotation = Quaternion.Euler(0, 0, 90);
@@ -233,7 +251,8 @@ public class GameManager : MonoBehaviour {
                     }
 
                     if (cell.HasFlag(WallState.LEFT) && Random.Range(1, mazeDestroyPercent) != 1 &&
-                        !noSpawn.Contains(getOppositeWallName("Wall " + i + " " + j + " LEFT", "LEFT"))) {
+                        !noSpawn.Contains(getOppositeWallName("Wall " + i + " " + j + " LEFT", "LEFT")) &&
+                        !blacklistWallNames.Contains("Wall " + i + " " + j + " LEFT")) {
                         GameObject wall = Instantiate(wallPrefab);
                         wall.transform.position = new Vector3(dotPosX - boxSize, dotPosY, 0);
                         wall.name = "Wall " + i + " " + j + " LEFT";
@@ -241,7 +260,8 @@ public class GameManager : MonoBehaviour {
                     }
 
                     if (cell.HasFlag(WallState.RIGHT) && Random.Range(1, mazeDestroyPercent) != 1 &&
-                        !noSpawn.Contains(getOppositeWallName("Wall " + i + " " + j + " RIGHT", "RIGHT"))) {
+                        !noSpawn.Contains(getOppositeWallName("Wall " + i + " " + j + " RIGHT", "RIGHT")) &&
+                        !blacklistWallNames.Contains("Wall " + i + " " + j + " RIGHT")) {
                         GameObject wall = Instantiate(wallPrefab);
                         wall.transform.position = new Vector3(dotPosX + boxSize, dotPosY, 0);
                         wall.name = "Wall " + i + " " + j + " RIGHT";
@@ -288,6 +308,10 @@ public class GameManager : MonoBehaviour {
 
         foreach (var bullet in GameObject.FindGameObjectsWithTag("Bullets")) {
             bullet.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+        }
+        
+        foreach (var missile in GameObject.FindGameObjectsWithTag("Missiles")) {
+            missile.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
         }
 
         yield return new WaitForSeconds(reloadTime);
@@ -343,6 +367,10 @@ public class GameManager : MonoBehaviour {
         }
 
         foreach (var powerup in GameObject.FindGameObjectsWithTag("Powerups")) {
+            Destroy(powerup);
+        }
+        
+        foreach (var powerup in GameObject.FindGameObjectsWithTag("Missiles")) {
             Destroy(powerup);
         }
 
@@ -407,6 +435,7 @@ public class GameManager : MonoBehaviour {
     }
 
     public void CheckWin() {
+        Debug.Log(GameObject.FindGameObjectsWithTag("Player").Length + " tanks left!");
         if (GameObject.FindGameObjectsWithTag("Player").Length == 1) {
             Debug.Log("One Tank Left!");
             gameState = GameState.WIN1;

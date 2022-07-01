@@ -22,7 +22,8 @@ public class Powerup : MonoBehaviour {
             if (controller.currentPowerUp == PowerupType.NONE) {
                 Debug.Log("Powerup: " + type);
                 controller.currentPowerUp = type;
-                controller.currentSpraySize = GameManager.Instance.spraySize;
+                if (type == PowerupType.SPRAY) controller.currentSpraySize = GameManager.Instance.spraySize;
+                if (type == PowerupType.MACHINEGUN) controller.currentMagSize = controller.currentMagSizeMax;
                 Destroy(gameObject);
             }
         }
@@ -36,11 +37,11 @@ public class Powerup : MonoBehaviour {
                 return GameManager.Instance.bombSprite;
             case PowerupType.LASER:
                 return GameManager.Instance.laserSprite;
-            case PowerupType.MACHINEGUN:
+            case PowerupType.MACHINEGUN: //done 
                 return GameManager.Instance.machineGunSprite;
             case PowerupType.MISSILE:
                 return GameManager.Instance.missileSprite;
-            case PowerupType.SPRAY:
+            case PowerupType.SPRAY: //done
                 return GameManager.Instance.spraySprite;
             case PowerupType.WIFI:
                 return GameManager.Instance.wifiSprite;
